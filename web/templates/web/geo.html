@@ -1,0 +1,390 @@
+{% load query_parameters %}
+{% load auth_extras %}
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <meta name="description" content="">
+      <meta name="author" content="">
+      <title>Observer</title>
+      <!-- Custom fonts for this template-->
+      <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" rel="stylesheet" type="text/css">
+      <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+      {% load static %}
+      <!-- Custom styles for this template -->
+      <link href="{% static "web/css/observer.css" %}" rel="stylesheet">
+   </head>
+   <body id="page-top">
+      <!-- Page Wrapper -->
+      <div id="wrapper">
+         <!-- Sidebar -->
+         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <!-- Sidebar - Brand -->
+            <div class="sidebar-brand d-flex align-items-center justify-content-center">
+               <div class="sidebar-brand-text mx-3">Observer</div>
+            </div>
+            {% if not request.user|has_group:"Country Only" %}
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+               My Organisations
+            </div>
+            <!-- Nav Item - Organisations -->
+            {% for entry in org_list %}
+            <li class="nav-item">
+               <a class="nav-link" href="#" onclick="filterOrg('{{ entry.id }}');">
+               <i class="fas fa-fw fa-building"></i>
+               <span>{{ entry.name }}</span></a>
+            </li>
+            {% endfor %}
+            {% endif %}
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+               My Country
+            </div>
+            <!-- Nav Item - My Country -->
+            <li class="nav-item active">
+               <a class="nav-link" href="/geo">
+               <i class="fas fa-fw fa-globe"></i>
+               <span>{{ home_country }}</span></a>
+            </li>
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+               Operations
+            </div>
+            <!-- Nav Item - Operations -->
+            <li class="nav-item">
+               <a class="nav-link" href="/logout/">
+               <i class="fas fa-fw fa-bomb"></i>
+               <span>Logout</span></a>
+            </li>
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+               <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+         </ul>
+         <!-- End of Sidebar -->
+         <!-- Content Wrapper -->
+         <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+               <!-- Topbar -->
+               <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                  <!-- Topbar Navbar -->
+                  <ul class="navbar-nav ml-auto">
+                     <!-- Nav Item - View Configuration -->
+                     <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="daysDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="mr-2 d-none d-lg-inline text-gray-600 font-weight-bold text-uppercase small">Days to Show</span>
+                        </a>
+                        <!-- Dropdown - Days to Display -->
+                        <div class="dropdown-menu shadow animated--grow-in" aria-labelledby="daysDropdown">
+                           <a class="dropdown-item" href="#" onclick="filterDays(1);">
+                           1
+                           </a>
+                           <a class="dropdown-item" href="#" onclick="filterDays(3);">
+                           3
+                           </a>
+                           <a class="dropdown-item" href="#" onclick="filterDays(5);">
+                           5
+                           </a>
+                           <a class="dropdown-item" href="#" onclick="filterDays(7);">
+                           7
+                           </a>
+                           <a class="dropdown-item" href="#" onclick="filterDays(14);">
+                           14
+                           </a>
+                        </div>
+                     </li>
+                  </ul>
+               </nav>
+               <!-- End of Topbar -->
+               <!-- Begin Page Content -->
+               <div class="container-fluid">
+                  {% if error %}
+                  <!-- Start of Error View -->
+                  <!-- Page Heading -->
+                  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                     <h1 class="h3 mb-0 text-gray-800">Howdy!</h1>
+                  </div>
+                  <!-- Content Row -->
+                  <div class="row">
+                     <!-- Area Chart -->
+                     <div class="col-xl-12 col-lg-12">
+                        <div class="card shadow mb-4">
+                           <!-- Card Header - Dropdown -->
+                           <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                              <h6 class="m-0 font-weight-bold text-primary">Message</h6>
+                           </div>
+                           <!-- Card Body -->
+                           <div class="card-body">
+                              <p class="card-text">{{ error }}</p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  {% else %}
+                  <!-- Start of Standard View -->
+                  <!-- Page Heading -->
+                  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                     <h1 class="h3 mb-0 text-gray-800">Viewing: {{ home_country }}</h1>
+                     <br/>
+                  </div>
+                  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                     {% if days == 1 %}
+                     <h5 class="h5 mb-0 text-gray-800">Showing 1 day</h5>
+                     {% else %}
+                     <h5 class="h5 mb-0 text-gray-800">Showing {{ days }} days</h5>
+                     {% endif %}
+                  </div>
+                  <!-- Content Row -->
+                  <div class="row">
+                     <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                           <div class="card-body">
+                              <div class="row no-gutters align-items-center">
+                                 <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Hosts</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ host_entities }}</div>
+                                 </div>
+                                 <div class="col-auto">
+                                    <i class="fas fa-exclamation fa-2x text-gray-300"></i>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                           <div class="card-body">
+                              <div class="row no-gutters align-items-center">
+                                 <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Host Observables</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ host_count }}</div>
+                                 </div>
+                                 <div class="col-auto">
+                                    <i class="fas fa-bug fa-2x text-gray-300"></i>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2">
+                           <div class="card-body">
+                              <div class="row no-gutters align-items-center">
+                                 <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Domains</div>
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ domain_entities }}</div>
+                                 </div>
+                                 <div class="col-auto">
+                                    <i class="fas fa-eye fa-2x text-gray-300"></i>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                           <div class="card-body">
+                              <div class="row no-gutters align-items-center">
+                                 <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Domain Observables</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ domain_count }}</div>
+                                 </div>
+                                 <div class="col-auto">
+                                    <i class="fas fa-sticky-note fa-2x text-gray-300"></i>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- Content Row -->
+                  <div class="row">
+                     <!-- Content Column -->
+                     <div class="col-xl-6 col-lg-6 mb-4">
+                        <div class="card shadow mb-4">
+                           <div class="card-header py-3">
+                              <h6 class="m-0 font-weight-bold text-primary">Hosts</h6>
+                           </div>
+                           <div class="card-body">
+                              {% if host_list %}
+                              {% for host_asn in host_list %}
+                              {% if forloop.first %}
+                              <h4 class="small font-weight-bold text-gray-800">{{ host_asn.asn }}</h4>
+                              {% else %}
+                              <h4 class="small font-weight-bold text-gray-800 pad-top">{{ host_asn.asn }}</h4>
+                              {% endif %}
+                              {% if host_asn.entities %}
+                              {% for host_entity in host_asn.entities %}
+                              <h4 class="small font-weight-bold text-gray-600">{{ host_entity.entity }}</h4>
+                              {% if host_entity.observables %}
+                              <a data-toggle="collapse" href="#h{{ host_entity.entity }}_obs">
+                                 <h5 class="small font-weight-bold">Observables</h5>
+                              </a>
+                              <ul class="collapse" id="h{{ host_entity.entity }}_obs">
+                                 {% for observable in host_entity.observables %}
+                                 <li class="card-text"><b>{{ observable.added }}:</b> {{ observable.observable }}</li>
+                                 {% endfor %}
+                              </ul>
+                              {% else %}
+                              <h5 class="small font-weight-bold">No Observables</h5>
+                              {% endif %}
+                              {% endfor %}
+                              {% else %}
+                              <h5 class="small font-weight-bold">No Entities</h5>
+                              {% endif %}
+                              {% endfor %}
+                              {% else %}
+                              <h5 class="small font-weight-bold">None found.</h5>
+                              {% endif %}
+                           </div>
+                        </div>
+                        <!-- End of Card -->
+                     </div>
+                     <!-- End of Column -->
+                     <div class="col-xl-6 col-lg-6 mb-4">
+                        <div class="card shadow mb-4">
+                           <div class="card-header py-3">
+                              <h6 class="m-0 font-weight-bold text-primary">Domains</h6>
+                           </div>
+                           <div class="card-body">
+                              {% if domain_list %}
+                              {% for domain_asn in domain_list %}
+                              {% if forloop.first %}
+                              <h4 class="small font-weight-bold text-gray-800">{{ domain_asn.asn }}</h4>
+                              {% else %}
+                              <h4 class="small font-weight-bold text-gray-800 pad-top">{{ domain_asn.asn }}</h4>
+                              {% endif %}
+                              {% if domain_asn.entities %}
+                              {% for domain_entity in domain_asn.entities %}
+                              <h4 class="small font-weight-bold text-gray-600">{{ domain_entity.entity }}</h4>
+                              {% if domain_entity.observables %}
+                              <a data-toggle="collapse" href="#h{{ domain_entity.entity }}_obs">
+                                 <h5 class="small font-weight-bold">Observables</h5>
+                              </a>
+                              <ul class="collapse" id="h{{ domain_entity.entity }}_obs">
+                                 {% for observable in domain_entity.observables %}
+                                 <li class="card-text"><b>{{ observable.added }}:</b> {{ observable.observable }}</li>
+                                 {% endfor %}
+                              </ul>
+                              {% else %}
+                              <h5 class="small font-weight-bold">No Observables</h5>
+                              {% endif %}
+                              {% endfor %}
+                              {% else %}
+                              <h5 class="small font-weight-bold">No Entities</h5>
+                              {% endif %}
+                              {% endfor %}
+                              {% else %}
+                              <h5 class="small font-weight-bold">None found.</h5>
+                              {% endif %}
+                           </div>
+                           <!-- End of Card -->
+                        </div>
+                        <!-- End of Column -->
+                     </div>
+                  </div>
+                  <!-- End of Row -->
+                  {% endif %}
+               </div>
+               <!-- /.container-fluid -->
+            </div>
+            <!-- End of Main Content -->
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+               <div class="container my-auto">
+                  <div class="copyright text-center my-auto">
+                     <span>Copyright &copy; Chris Campbell 2019</span>
+                  </div>
+               </div>
+            </footer>
+            <!-- End of Footer -->
+         </div>
+         <!-- End of Content Wrapper -->
+      </div>
+      <!-- End of Page Wrapper -->
+      <!-- Scroll to Top Button-->
+      <a class="scroll-to-top rounded" href="#page-top">
+      <i class="fas fa-angle-up"></i>
+      </a>
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.js"></script>
+      <script>
+         function filterOrg(orgId) {
+           var target = window.location.href.replace('geo', 'org');
+           var url = new URL(target);
+           url.searchParams.set('org', orgId);
+           window.location.replace(url.toString());
+         }
+         function filterDays(days) {
+           var url = new URL(window.location.href);
+           url.searchParams.set('days', days);
+           window.location.replace(url.toString());
+         }
+      </script>
+      <script>
+         (function($) {
+           "use strict"; // Start of use strict
+         
+           // Toggle the side navigation
+           $("#sidebarToggle, #sidebarToggleTop").on('click', function(e) {
+             $("body").toggleClass("sidebar-toggled");
+             $(".sidebar").toggleClass("toggled");
+             if ($(".sidebar").hasClass("toggled")) {
+               $('.sidebar .collapse').collapse('hide');
+             };
+           });
+         
+           // Close any open menu accordions when window is resized below 768px
+           $(window).resize(function() {
+             if ($(window).width() < 768) {
+               $('.sidebar .collapse').collapse('hide');
+             };
+           });
+         
+           // Prevent the content wrapper from scrolling when the fixed side navigation hovered over
+           $('body.fixed-nav .sidebar').on('mousewheel DOMMouseScroll wheel', function(e) {
+             if ($(window).width() > 768) {
+               var e0 = e.originalEvent,
+                 delta = e0.wheelDelta || -e0.detail;
+               this.scrollTop += (delta < 0 ? 1 : -1) * 30;
+               e.preventDefault();
+             }
+           });
+         
+           // Scroll to top button appear
+           $(document).on('scroll', function() {
+             var scrollDistance = $(this).scrollTop();
+             if (scrollDistance > 100) {
+               $('.scroll-to-top').fadeIn();
+             } else {
+               $('.scroll-to-top').fadeOut();
+             }
+           });
+         
+           // Smooth scrolling using jQuery easing
+           $(document).on('click', 'a.scroll-to-top', function(e) {
+             var $anchor = $(this);
+             $('html, body').stop().animate({
+               scrollTop: ($($anchor.attr('href')).offset().top)
+             }, 1000, 'easeInOutExpo');
+             e.preventDefault();
+           });
+         
+         })(jQuery); // End of use strict
+      </script>
+   </body>
+</html>

@@ -1,0 +1,15 @@
+[Unit]
+Description = ObserverWeb
+After = network.target
+
+[Service]
+PermissionsStartOnly = true
+PIDFile = /var/run/observer-web.pid
+User = root
+Group = root
+WorkingDirectory = /opt/observer
+ExecStart = /usr/local/bin/gunicorn observer.wsgi:application -b 0.0.0.0:8000 --pid /var/run/observer-web.pid
+ExecStop = /bin/kill -s TERM $MAINPID
+
+[Install]
+WantedBy = multi-user.target

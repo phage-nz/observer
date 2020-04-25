@@ -1,0 +1,14 @@
+[Unit]
+Description=Observer Service
+After=network.target
+
+[Service]
+ExecStart=/opt/observer/start_services.sh
+PIDFile=/var/run/observer.pid
+ExecStop=/bin/kill -s TERM $MAINPID
+
+User=root
+Group=root
+
+[Install]
+WantedBy=default.target
