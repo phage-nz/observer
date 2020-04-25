@@ -82,7 +82,7 @@ systemctl start observer.service
 systemctl start observer-web.service
 ```
 
-Once set up, sign in to Django admin at https://yourdomain.here/admin and define at least one organisation object. You can then run a batch job to search for their data by defining their name at the head of /opt/observer/scripts/batch.py and running:
+Once set up, sign in to Django admin at https://yourdomain.here/admin and input your feeds. Feeds must be of a plaintext type (e.g. https://urlhaus.abuse.ch/downloads/csv_online/). Also, define at least one organisation object. You can then run a batch job to search for their data by defining their name at the head of /opt/observer/scripts/batch.py and running:
 ```
 python3 manage.py runscript batch
 ```
